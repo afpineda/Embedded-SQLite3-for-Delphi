@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{BB542FF5-E59F-4171-89BF-3B362C501149}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="SQLite3Test.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="SQLite3CodeGen.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="SQLite3Test">
+        <MSBuild Projects="SQLite3Test.dproj"/>
+    </Target>
+    <Target Name="SQLite3Test:Clean">
+        <MSBuild Projects="SQLite3Test.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SQLite3Test:Make">
+        <MSBuild Projects="SQLite3Test.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SQLite3CodeGen">
+        <MSBuild Projects="SQLite3CodeGen.dproj"/>
+    </Target>
+    <Target Name="SQLite3CodeGen:Clean">
+        <MSBuild Projects="SQLite3CodeGen.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SQLite3CodeGen:Make">
+        <MSBuild Projects="SQLite3CodeGen.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="SQLite3Test;SQLite3CodeGen"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="SQLite3Test:Clean;SQLite3CodeGen:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="SQLite3Test:Make;SQLite3CodeGen:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

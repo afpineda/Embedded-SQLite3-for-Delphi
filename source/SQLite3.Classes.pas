@@ -28,6 +28,7 @@ unit SQLite3.Classes;
 
   - 2012-03-22: First implementation
   - 2019-09-19: Updated to SQLITE version 3.25.1
+  - 2021-04-06: Updated to SQLITE version 3.35.
 
   TO DO:
 

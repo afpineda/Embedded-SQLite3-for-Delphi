@@ -20,6 +20,8 @@ unit SQLite3.Core.Objects;
   - 2019-09-19: Moved from SQLite3Lib and updated to
   SQLITE version 3.25.1 (2018)
 
+  - 2021-04-06: Updated to SQLITE version 3.35.
+
   ******************************************************* }
 
 interface

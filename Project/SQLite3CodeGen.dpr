@@ -24,6 +24,8 @@ program SQLite3CodeGen;
 
   - 2018-09-224: First implementation
 
+  - 2021-04-06: Updated to SQLITE version 3.35.
+
   ******************************************************* }
 {$APPTYPE CONSOLE}
 {$R *.res}
