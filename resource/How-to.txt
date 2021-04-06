@@ -1,0 +1,7 @@
+Place "sqlite3.DLL" on the 32-bits or 64-bit folder, depending on platform architecture.
+Then run CompileRC.bat
+It should generate the following files:
+..\source\sqlite3Dll32.res
+..\source\sqlite3Dll64.res
+
+which are included at compile time into your application.
