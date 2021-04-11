@@ -29,6 +29,7 @@ unit SQLite3.Classes;
   - 2012-03-22: First implementation
   - 2019-09-19: Updated to SQLITE version 3.25.1
   - 2021-04-06: Updated to SQLITE version 3.35.
+  - 2021-04-07: Added "SQLStr" function
 
   TO DO:
 
@@ -344,9 +345,11 @@ type
       read GetCompileOptionByName;
   end;
 
+function SQLStr(const text: string): string;
+
 implementation
 
-uses SQLite3.Core.Constants, SQLite3.Core.Functions;
+uses System.StrUtils, SQLite3.Core.Constants, SQLite3.Core.Functions;
 
 resourcestring
   WRONG_INDEX_MSG = 'Wrong parameter index to SQL statement';
@@ -388,8 +391,17 @@ resourcestring
   MSG_SQLITE_DONE = 'No more rows';
 
   // -------------------------------------------------------------------------
-  // ESQLiteError
+  // Formatting
   // -------------------------------------------------------------------------
+
+function SQLStr(const text: string): string;
+begin
+  Result := '''' + ReplaceText(text, '''', '''''') + '''';
+end;
+
+// -------------------------------------------------------------------------
+// ESQLiteError
+// -------------------------------------------------------------------------
 
 class function ESQLiteError.SQLiteErrMsg(ErrCode: integer): String;
 begin
