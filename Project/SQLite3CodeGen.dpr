@@ -26,6 +26,9 @@ program SQLite3CodeGen;
 
   - 2021-04-06: Updated to SQLITE version 3.35.
 
+  - 2021-05-10: Fixed minor bug at "ENotImplemented"
+  exception raising
+
   ******************************************************* }
 {$APPTYPE CONSOLE}
 {$R *.res}
@@ -116,7 +119,7 @@ begin
   header := header + ';';
 
   body := Format('begin if assigned(%s[%d]) then %s else ' +
-    'raise ENotImplemented.Create(''EXCPT_MSG''); end;',
+    'raise ENotImplemented.Create(EXCPT_MSG); end;',
     [PROC_ARRAY, counter, call]);
   procNames.Add(procName);
   headers.Add(header);
