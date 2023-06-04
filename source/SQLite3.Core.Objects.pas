@@ -19,8 +19,8 @@ unit SQLite3.Core.Objects;
 
   - 2019-09-19: Moved from SQLite3Lib and updated to
   SQLITE version 3.25.1 (2018)
-
   - 2021-04-06: Updated to SQLITE version 3.35.
+  - 2023-06-02: Updated to SQLITE version 3.42.0
 
   ******************************************************* }
 
@@ -35,13 +35,13 @@ type
   Psqlite3_context = type Pointer;
   Psqlite3_data_directory = type Pointer;
   Psqlite3_file = type Pointer;
-  Psqlite3_io_methods = type Pointer;
-  Psqlite3_io_mem_methods = type Pointer;
+  Psqlite3_filename = type Pointer;
   Psqlite3_index_info = type Pointer;
   Psqlite3_int64 = type Pointer;
   Psqlite3_uint64 = type Pointer;
   Psqlite_int64 = type Pointer;
   Psqlite_uint64 = type Pointer;
+  Psqlite3_io_methods = type Pointer;
   Psqlite3_mem_methods = type Pointer;
   Psqlite3_module = type Pointer;
   Psqlite3_mutex = type Pointer;
@@ -60,6 +60,7 @@ type
 
 type
   // Auxiliary types and callbacks
+  Tsqlite3_int64 = int64;
   PUTF8Char = PAnsiChar;
   PUTF8CharArray = array of PUTF8Char;
   TSQLite3Destructor = procedure(Data: Pointer); cdecl;
@@ -95,6 +96,82 @@ type
     const database, table: UTF8String; rowid: int64); cdecl;
   TWALCallback = function(UserData: Pointer; db: PSQLite3;
     const dbName: UTF8String; pageCount: integer): integer; cdecl;
+  TAutovacuumCallback = function(pClientData: Pointer;
+    const zSchema: UTF8String; nDbPage, nFreePagenBytePerPage: cardinal)
+    : cardinal; cdecl;
+
+  Tsqlite3_io_methods = record
+    iVersion: integer;
+    xClose: function(arg: Psqlite3_file): integer; cdecl;
+    xRead: function(arg1: Psqlite3_file; arg2: Pointer; iAmt: integer;
+      iOfst: Tsqlite3_int64): integer; cdecl;
+    xWrite: function(arg1: Psqlite3_file; arg2: Pointer; iAmt: integer;
+      iOfst: Tsqlite3_int64): integer; cdecl;
+    xTruncate: function(arg1: Psqlite3_file; size: Tsqlite3_int64)
+      : integer; cdecl;
+    xSync: function(arg1: Psqlite3_file; flags: integer): integer; cdecl;
+    xFileSize: function(arg1: Psqlite3_file; var pSize: Tsqlite3_int64)
+      : integer; cdecl;
+    xLock: function(arg1: Psqlite3_file; arg2: integer): integer; cdecl;
+    xUnlock: function(arg1: Psqlite3_file; arg2: integer): integer; cdecl;
+    xCheckReservedLock: function(arg1: Psqlite3_file; var pResOut: integer)
+      : integer; cdecl;
+    xFileControl: function(arg1: Psqlite3_file; op: integer; pArg: Pointer)
+      : integer; cdecl;
+    xSectorSize: function(arg1: Psqlite3_file): integer; cdecl;
+    xDeviceCharacteristics: function(arg1: Psqlite3_file): integer; cdecl;
+    xShmMap: function(arg1: Psqlite3_file; iPg, pgsz, arg2: integer;
+      var volatile: Pointer): integer; cdecl;
+    xShmLock: function(arg1: Psqlite3_file; offset, n, flags: integer)
+      : integer; cdecl;
+    xShmBarrier: procedure(arg1: Psqlite3_file); cdecl;
+    xShmUnmap: function(arg1: Psqlite3_file; deleteFlag: integer)
+      : integer; cdecl;
+    xFetch: function(arg1: Psqlite3_file; iOfst: Tsqlite3_int64; iAmt: integer;
+      var arg2: Pointer): integer; cdecl;
+    xUnfetch: function(arg1: Psqlite3_file; iOfst: Tsqlite3_int64;
+      arg2: Pointer): integer; cdecl;
+  end; // Tsqlite3_io_methods
+
+  Tsqlite3_filename = UTF8String;
+
+  Tsqlite3_index_constraint = record
+    iColumn: integer;
+    op, usable: Byte;
+    iTermOffset: integer;
+  end;
+
+  Psqlite3_index_constraint = ^Tsqlite3_index_constraint;
+
+  Tsqlite3_index_orderby = record
+    iColumn: integer;
+    desc: Byte;
+  end;
+
+  Psqlite3_index_orderby = ^Tsqlite3_index_orderby;
+
+  Tsqlite3_index_constraint_usage = record
+    argvIndex: integer;
+    omit: Byte;
+  end;
+  Psqlite3_index_constraint_usage = ^Tsqlite3_index_constraint_usage;
+
+  Tsqlite3_index_info = record
+    nConstraint: integer;
+    aConstraint: Psqlite3_index_constraint;
+    nOrderBy: integer;
+    aOrderBy: Psqlite3_index_orderby;
+    aConstraintUsage: Tsqlite3_index_constraint_usage;
+    idxNum: integer;
+    idxSTR: PUTF8Char;
+    needToFreeIdxStr: integer;
+    orderByConsumed: integer;
+    estimatedCost: Double;
+    estimatedRows: Tsqlite3_int64;
+    idxFlags: integer;
+    colUsed: UInt64;
+  end;
+  PTsqlite3_index_info = ^Tsqlite3_index_info;
 
 implementation
 

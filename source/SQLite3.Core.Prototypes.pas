@@ -28,6 +28,7 @@ unit SQLite3.Core.Prototypes;
   SQLITE version 3.25.1 (2018)
 
   - 2021-04-06: Updated to SQLITE version 3.35.
+  - 2023-06-03: Updated to SQLITE version 3.42.
 
   *******************************************************
 
@@ -49,11 +50,16 @@ type
     nBytes: integer): pointer; cdecl;
 
   // Automatically Load Statically Linked Extensions
-  Tsqlite3_auto_extension = function(xEntryPoint: TxEntryPoint): integer;
+  Tsqlite3_auto_extension = function(xEntryPoint: TxEntryPoint): integer; cdecl;
+
+  // Autovacuum Compaction Amount Callback
+  Tsqlite3_autovacuum_pages = function(db: PSQLite3;
+    callback: TAutovacuumCallback; data: pointer;
+    destructorCallback: TSQLite3Destructor): integer;
 
   // Backup
-  Tsqlite3_backup_init = function(pDest: Psqlite3; const zDestName: UTF8String;
-    pSource: Psqlite3; const zSourceName: UTF8String): PSqlite3_backup; cdecl;
+  Tsqlite3_backup_init = function(pDest: PSQLite3; const zDestName: UTF8String;
+    pSource: PSQLite3; const zSourceName: UTF8String): PSqlite3_backup; cdecl;
   Tsqlite3_backup_step = function(p: PSqlite3_backup; nPage: integer)
     : integer; cdecl;
   Tsqlite3_backup_finish = function(p: PSqlite3_backup): integer; cdecl;
@@ -105,7 +111,7 @@ type
   // Blob
   Tsqlite3_blob_bytes = function(pBlob: Psqlite3_blob): integer; cdecl;
   Tsqlite3_blob_close = function(pBlob: Psqlite3_blob): integer; cdecl;
-  Tsqlite3_blob_open = function(db: Psqlite3; const zDb: UTF8String;
+  Tsqlite3_blob_open = function(db: PSQLite3; const zDb: UTF8String;
     const zTable: UTF8String; const zColumn: UTF8String; iRow: int64;
     flags: integer; out ppBlob: Psqlite3_blob): integer; cdecl;
   Tsqlite3_blob_read = function(pBlob: Psqlite3_blob; buffer: pointer;
@@ -116,29 +122,30 @@ type
     nBytes: integer; iOffset: integer): integer; cdecl;
 
   // Busy errors and timeouts
-  Tsqlite3_busy_handler = function(db: Psqlite3; callback: TBusyHandlerCallback;
+  Tsqlite3_busy_handler = function(db: PSQLite3; callback: TBusyHandlerCallback;
     p: pointer): integer; cdecl;
-  Tsqlite3_busy_timeout = function(db: Psqlite3; ms: integer): integer; cdecl;
+  Tsqlite3_busy_timeout = function(db: PSQLite3; ms: integer): integer; cdecl;
 
   // cancel auto extension
   Tsqlite3_cancel_auto_extension = function(xEntryPoint: TxEntryPoint)
     : integer; cdecl;
 
   // Count The Number Of Rows Modified
-  Tsqlite3_changes = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_changes = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_changes64 = function(db: PSQLite3): int64; cdecl;
 
   // Reset All Bindings On A Prepared Statement
   Tsqlite3_clear_bindings = function(stmt: Psqlite3_stmt): integer; cdecl;
 
   // Close database
-  Tsqlite3_close = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_close = function(db: PSQLite3): integer; cdecl;
   // for garbage collection languages
-  Tsqlite3_close_v2 = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_close_v2 = function(db: PSQLite3): integer; cdecl;
 
   // Collation
-  Tsqlite3_collation_needed = function(db: Psqlite3; p: pointer;
+  Tsqlite3_collation_needed = function(db: PSQLite3; p: pointer;
     callback: TCollationNeededCallback): integer; cdecl;
-  Tsqlite3_collation_needed16 = function(db: Psqlite3; p: pointer;
+  Tsqlite3_collation_needed16 = function(db: PSQLite3; p: pointer;
     callback: TCollationNeeded16Callback): integer; cdecl;
 
   // Column info
@@ -193,9 +200,9 @@ type
     : PWideChar; cdecl;
 
   // Commit And Rollback Notification Callbacks
-  Tsqlite3_commit_hook = function(db: Psqlite3; callback: TCommitHookCallback)
+  Tsqlite3_commit_hook = function(db: PSQLite3; callback: TCommitHookCallback)
     : pointer; cdecl;
-  Tsqlite3_rollback_hook = function(db: Psqlite3;
+  Tsqlite3_rollback_hook = function(db: PSQLite3;
     callback: TRollbackHookCallback): pointer; cdecl;
 
   // Run-Time Library Compilation Options Diagnostics
@@ -211,98 +218,108 @@ type
   // Tsqlite3_config
 
   // Get db handle from function
-  Tsqlite3_context_db_handle = function(ctx: Psqlite3_context): Psqlite3; cdecl;
+  Tsqlite3_context_db_handle = function(ctx: Psqlite3_context): PSQLite3; cdecl;
 
   // Define New Collating Sequences
-  Tsqlite3_create_collation = function(db: Psqlite3; const name: UTF8String;
+  Tsqlite3_create_collation = function(db: PSQLite3; const name: UTF8String;
     eTextRep: integer; pArg: pointer; xCallback: TCollationFunctionCallback)
     : integer; cdecl;
-  Tsqlite3_create_collation_v2 = function(db: Psqlite3; const name: UTF8String;
+  Tsqlite3_create_collation_v2 = function(db: PSQLite3; const name: UTF8String;
     eTextRep: integer; pArg: pointer; xCallback: TCollationFunctionCallback;
     xDestroy: TCollationDestroyCallback): integer; cdecl;
-  Tsqlite3_create_collation16 = function(db: Psqlite3;
+
+  Tsqlite3_create_collation16 = function(db: PSQLite3;
     const name: UnicodeString; eTextRep: integer; pArg: pointer;
     xCallback: TCollationFunctionCallback): integer; cdecl;
 
   // Create Or Redefine SQL Functions
-  Tsqlite3_create_function = function(db: Psqlite3;
+  Tsqlite3_create_function = function(db: PSQLite3;
     const FunctionName: UTF8String; nArg, eTextRep: integer; pApp: pointer;
     xFunc, xStep: TSQLiteFunctionDef; xFinal: TSQLiteFunctionFinal)
     : integer; cdecl;
-  Tsqlite3_create_function16 = function(db: Psqlite3;
+  Tsqlite3_create_function16 = function(db: PSQLite3;
     FunctionName: UnicodeString; nArg, eTextRep: integer; pApp: pointer;
     xFunc, xStep: TSQLiteFunctionDef; xFinal: TSQLiteFunctionFinal)
     : integer; cdecl;
-  Tsqlite3_create_function_v2 = function(db: Psqlite3;
+  Tsqlite3_create_function_v2 = function(db: PSQLite3;
     const FunctionName: UTF8String; nArg, eTextRep: integer; pApp: pointer;
     xFunc, xStep: TSQLiteFunctionDef; xFinal: TSQLiteFunctionFinal;
     xDestroy: TSQLite3Destructor): integer; cdecl;
-  Tsqlite3_create_window_function = function(db: Psqlite3;
+  Tsqlite3_create_window_function = function(db: PSQLite3;
     const FunctionName: UTF8String; nArg, eTextRep: integer; pApp: pointer;
     xStep: TSQLiteFunctionDef; xFinal, xValue: TSQLiteFunctionFinal;
     xInverse: TSQLiteFunctionDef; xDestroy: TSQLite3Destructor): integer; cdecl;
 
   // Register A Virtual Table Implementation
-  Tsqlite3_create_module = function(db: Psqlite3; const zName: UTF8String;
+  Tsqlite3_create_module = function(db: PSQLite3; const zName: UTF8String;
     const p: Psqlite3_module; pClientData: pointer): integer; cdecl;
-  Tsqlite3_create_module_v2 = function(db: Psqlite3; const zName: UTF8String;
+  Tsqlite3_create_module_v2 = function(db: PSQLite3; const zName: UTF8String;
     const p: Psqlite3_module; pClientData: pointer;
     xDestroy: TSQLite3Destructor): integer; cdecl;
 
   // Number of columns in a result set
   Tsqlite3_data_count = function(pStmt: Psqlite3_stmt): integer; cdecl;
 
+  Tsqlite3_database_file_object = function(const arg: UTF8String)
+    : Psqlite3_file;
+
   // Flush caches to disk mid-transaction
-  Tsqlite3_db_cacheflush = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_db_cacheflush = function(db: PSQLite3): integer; cdecl;
 
   // Configure database connections
   // Tsqlite3_db_config = NOT translated
 
   // Return The Filename For A Database Connection
-  Tsqlite3_db_filename = function(db: Psqlite3; const zDbName: UTF8String)
+  Tsqlite3_db_filename = function(db: PSQLite3; const zDbName: UTF8String)
     : PUTF8Char; cdecl;
 
   // Find The Database Handle Of A Prepared Statement
-  Tsqlite3_db_handle = function(stmt: Psqlite3_stmt): Psqlite3; cdecl;
+  Tsqlite3_db_handle = function(stmt: Psqlite3_stmt): PSQLite3; cdecl;
 
   // Retrieve the mutex for a database connection
-  Tsqlite3_db_mutex = function(db: Psqlite3): PSqlite3_mutex; cdecl;
+  Tsqlite3_db_mutex = function(db: PSQLite3): PSqlite3_mutex; cdecl;
+
+  Tsqlite3_db_name = function(db: PSQLite3): UTF8String; cdecl;
 
   // Determine if a database is read-only
-  Tsqlite3_db_readonly = function(db: Psqlite3; const zDbName: UTF8String)
+  Tsqlite3_db_readonly = function(db: PSQLite3; const zDbName: UTF8String)
     : integer; cdecl;
 
   // Free Memory Used By A Database Connection
-  Tsqlite3_db_release_memory = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_db_release_memory = function(db: PSQLite3): integer; cdecl;
 
   // Database Connection Status
-  Tsqlite3_db_status = function(db: Psqlite3; op: integer; out pCur: integer;
+  Tsqlite3_db_status = function(db: PSQLite3; op: integer; out pCur: integer;
     out pHiwtr: integer; resetFlg: integer): integer; cdecl;
 
   // Declare The Schema Of A Virtual Table
-  Tsqlite3_declare_vtab = function(db: Psqlite3; const zSQL: UTF8String)
+  Tsqlite3_declare_vtab = function(db: PSQLite3; const zSQL: UTF8String)
     : integer; cdecl;
 
   // Deserialize a database
-  Tsqlite3_deserialize = function(db: Psqlite3; const zSchema: UTF8String;
+  Tsqlite3_deserialize = function(db: PSQLite3; const zSchema: UTF8String;
     pData: PUTF8Char; szDb, szBuf: int64; mFlags: cardinal): integer; cdecl;
 
+  Tsqlite3_drop_modules = function(db: PSQLite3; const azKeep: PUTF8CharArray)
+    : integer; cdecl;
+
   // Enable Or Disable Extension Loading
-  Tsqlite3_enable_load_extension = function(db: Psqlite3; onoff: integer)
+  Tsqlite3_enable_load_extension = function(db: PSQLite3; onoff: integer)
     : integer; cdecl;
 
   // Enable Or Disable Shared Pager Cache
   Tsqlite3_enable_shared_cache = function(onoff: integer): integer; cdecl;
 
   // Error Codes And Messages
-  Tsqlite3_errcode = function(db: Psqlite3): integer; cdecl;
-  Tsqlite3_extended_errcode = function(db: Psqlite3): integer; cdecl;
-  Tsqlite3_errmsg = function(db: Psqlite3): PUTF8Char; cdecl;
-  Tsqlite3_errmsg16 = function(db: Psqlite3): PWideChar; cdecl;
+  Tsqlite3_errcode = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_extended_errcode = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_errmsg = function(db: PSQLite3): PUTF8Char; cdecl;
+  Tsqlite3_errmsg16 = function(db: PSQLite3): PWideChar; cdecl;
+  Tsqlite3_error_offset = function(db: PSQLite3): integer; cdecl;
   Tsqlite3_errstr = function(errcode: integer): PUTF8Char; cdecl;
 
   // One-Step Query Execution Interface
-  Tsqlite3_exec = function(db: Psqlite3; const sql: UTF8String;
+  Tsqlite3_exec = function(db: PSQLite3; const sql: UTF8String;
     callback: TSQLiteExecCallback; UserData: pointer; var errmsg: PUTF8Char)
     : integer; cdecl;
 
@@ -311,12 +328,20 @@ type
   Tsqlite3_expanded_sql = function(pStmt: Psqlite3_stmt): PUTF8Char; cdecl;
 
   // Enable Or Disable Extended Result Codes
-  Tsqlite3_extended_result_codes = function(db: Psqlite3; onoff: integer)
+  Tsqlite3_extended_result_codes = function(db: PSQLite3; onoff: integer)
     : integer; cdecl;
 
   // Low-Level Control Of Database Files
-  Tsqlite3_file_control = function(db: Psqlite3; const zDbName: UTF8String;
+  Tsqlite3_file_control = function(db: PSQLite3; const zDbName: UTF8String;
     op: integer; UserData: pointer): integer; cdecl;
+
+  // File Name
+  Tsqlite3_create_filename = function(const zDatabase, zJournal,
+    zWal: UTF8String; nParam: integer; var azParam: UTF8String): UTF8String;
+  Tsqlite3_filename_database = function(const fn: Tsqlite3_filename): PUTF8Char;
+  Tsqlite3_filename_journal = function(const fn: Tsqlite3_filename): PUTF8Char;
+  Tsqlite3_filename_wal = function(const fn: Tsqlite3_filename): PUTF8Char;
+  Tsqlite3_free_filename = procedure(const fn: Tsqlite3_filename);
 
   // Destroy A Prepared Statement Object
   Tsqlite3_finalize = function(pStmt: Psqlite3_stmt): integer; cdecl;
@@ -333,12 +358,14 @@ type
   Tsqlite3_mutex_held = function(mutex: PSqlite3_mutex): integer; cdecl;
   Tsqlite3_mutex_notheld = function(mutex: PSqlite3_mutex): integer; cdecl;
 
-  // Convenience Routines For Running Queries
-  // Tsqlite3_free_table = NOT Implemented (legacy)
-  // Tsqlite3_get_table = NOT translated (legacy)
+  // Convenience Routines For Running Queries (legacy)
+  Tsqlite3_get_table = function(db: PSQLite3; const zSQL: UTF8String;
+    var pazResult: PUTF8CharArray; var pnRow, pnColumn: integer;
+    var pzErrmsg: UTF8String): integer; cdecl;
+  Tsqlite3_free_table = procedure(var pazResult: PUTF8CharArray); cdecl;
 
   // Test For Auto-Commit Mode
-  Tsqlite3_get_autocommit = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_get_autocommit = function(db: PSQLite3): integer; cdecl;
 
   // Function Auxiliary Data
   Tsqlite3_get_auxdata = function(ctx: Psqlite3_context; N: integer)
@@ -346,7 +373,9 @@ type
   Tsqlite3_set_auxdata = procedure(ctx: Psqlite3_context; N: integer;
     metadata: pointer; xDestructor: TSQLite3Destructor); cdecl;
 
-  // Tsqlite3_get_table = NOT translated (legacy)
+  // Heap limit
+  Tsqlite3_soft_heap_limit64 = function(N: Tsqlite3_int64): Tsqlite3_int64;
+  Tsqlite3_hard_heap_limit64 = function(N: Tsqlite3_int64): Tsqlite3_int64;
 
   // Initialize The SQLite Library
   Tsqlite3_initialize = function: integer; cdecl;
@@ -355,7 +384,11 @@ type
   Tsqlite3_os_end = function: integer; cdecl;
 
   // Interrupt A Long-Running Query
-  Tsqlite3_interrupt = procedure(db: Psqlite3); cdecl;
+  Tsqlite3_interrupt = procedure(db: PSQLite3); cdecl;
+  Tsqlite3_is_interrupted = function(db: PSQLite3): integer; cdecl;
+
+  // Error Logging Interface
+  // Tsqlite3_log = not translated (open parameters)
 
   // SQL Keyword Checking
   Tsqlite3_keyword_count = function: integer; cdecl;
@@ -365,7 +398,7 @@ type
     : integer; cdecl;
 
   // Last Insert Rowid
-  Tsqlite3_last_insert_rowid = function(db: Psqlite3): int64; cdecl;
+  Tsqlite3_last_insert_rowid = function(db: PSQLite3): int64; cdecl;
 
   // Run-Time Library Version Numbers
   Tsqlite3_libversion = function: PUTF8Char; cdecl;
@@ -373,10 +406,10 @@ type
   Tsqlite3_libversion_number = function: integer; cdecl;
 
   // Run-time Limits
-  Tsqlite3_limit = function(db: Psqlite3; id, newval: integer): integer; cdecl;
+  Tsqlite3_limit = function(db: PSQLite3; id, newval: integer): integer; cdecl;
 
   // Load An Extension
-  Tsqlite3_load_extension = function(db: Psqlite3;
+  Tsqlite3_load_extension = function(db: PSQLite3;
     const zFile, zProc: UTF8String; out errmsg: UTF8String): integer; cdecl;
 
   // Tsqlite3_log = NOT translated
@@ -395,59 +428,60 @@ type
   Tsqlite3_mutex_leave = procedure(mutex: PSqlite3_mutex); cdecl;
 
   // Find the next prepared statement
-  Tsqlite3_next_stmt = function(db: Psqlite3; pStmt: Psqlite3_stmt)
+  Tsqlite3_next_stmt = function(db: PSQLite3; pStmt: Psqlite3_stmt)
     : Psqlite3_stmt; cdecl;
 
   // Opening A New Database Connection
-  Tsqlite3_open = function(const filename: UTF8String; SQLite3: Psqlite3)
+  Tsqlite3_open = function(const filename: UTF8String; SQLite3: PSQLite3)
     : integer; cdecl;
   Tsqlite3_open16 = function(const filename: UnicodeString;
-    out SQLite3: Psqlite3): integer; cdecl;
-  Tsqlite3_open_v2 = function(const filename: UTF8String; out SQLite3: Psqlite3;
+    out SQLite3: PSQLite3): integer; cdecl;
+  Tsqlite3_open_v2 = function(const filename: UTF8String; out SQLite3: PSQLite3;
     flags: integer; const zVfs: PAnsiString): integer; cdecl;
 
   // Overload A Function For A Virtual Table
-  Tsqlite3_overload_function = function(db: Psqlite3;
+  Tsqlite3_overload_function = function(db: PSQLite3;
     const zFuncName: UTF8String; nArg: integer): integer; cdecl;
 
   // Compiling An SQL Statement
-  Tsqlite3_prepare = function(db: Psqlite3; const zSQL: UTF8String;
+  Tsqlite3_prepare = function(db: PSQLite3; const zSQL: UTF8String;
     nByte: integer; out ppStmt: Psqlite3_stmt; out pzTail: PUTF8Char)
     : integer; cdecl;
-  Tsqlite3_prepare_v2 = function(db: Psqlite3; const zSQL: UTF8String;
+  Tsqlite3_prepare_v2 = function(db: PSQLite3; const zSQL: UTF8String;
     nByte: integer; out ppStmt: Psqlite3_stmt; out pzTail: PUTF8Char)
     : integer; cdecl;
-  Tsqlite3_prepare_v3 = function(db: Psqlite3; const zSQL: UTF8String;
+  Tsqlite3_prepare_v3 = function(db: PSQLite3; const zSQL: UTF8String;
     nByte: integer; prepFlags: cardinal; out ppStmt: Psqlite3_stmt;
     out pzTail: PUTF8Char): integer; cdecl;
-  Tsqlite3_prepare16 = function(db: Psqlite3; const zSQL: UnicodeString;
+  Tsqlite3_prepare16 = function(db: PSQLite3; const zSQL: UnicodeString;
     nByte: integer; out ppStmt: Psqlite3_stmt; out pzTail: PUnicodeString)
     : integer; cdecl;
-  Tsqlite3_prepare16_v2 = function(db: Psqlite3; const zSQL: UnicodeString;
+  Tsqlite3_prepare16_v2 = function(db: PSQLite3; const zSQL: UnicodeString;
     nByte: integer; out ppStmt: Psqlite3_stmt; out pzTail: PUnicodeString)
     : integer; cdecl;
-  Tsqlite3_prepare16_v3 = function(db: Psqlite3; const zSQL: UnicodeString;
+  Tsqlite3_prepare16_v3 = function(db: PSQLite3; const zSQL: UnicodeString;
     nByte: integer; prepFlags: cardinal; out ppStmt: Psqlite3_stmt;
     out pzTail: PUTF8Char): integer; cdecl;
 
   // The pre-update hook
-  Tsqlite3_preupdate_hook = function(db: Psqlite3;
+  Tsqlite3_preupdate_hook = function(db: PSQLite3;
     xPreUpdate: TPreupdateHookCallback; pCtx: pointer): pointer; cdecl;
-  Tsqlite3_preupdate_old = function(db: Psqlite3; col: integer;
+  Tsqlite3_preupdate_old = function(db: PSQLite3; col: integer;
     out value: Psqlite3_value): integer; cdecl;
-  Tsqlite3_preupdate_count = function(db: Psqlite3): integer; cdecl;
-  Tsqlite3_preupdate_depth = function(db: Psqlite3): integer; cdecl;
-  Tsqlite3_preupdate_new = function(db: Psqlite3; col: integer;
+  Tsqlite3_preupdate_count = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_preupdate_depth = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_preupdate_new = function(db: PSQLite3; col: integer;
     out value: Psqlite3_value): integer; cdecl;
+  Tsqlite3_preupdate_blobwrite = function(db: PSQLite3): integer; cdecl;
 
   // Tracing And Profiling Functions
-  Tsqlite3_trace = function(db: Psqlite3; xTrace: TTraceCallback;
+  Tsqlite3_trace = function(db: PSQLite3; xTrace: TTraceCallback;
     UserData: pointer): pointer; cdecl;
-  Tsqlite3_profile = function(db: Psqlite3; xProfile: TProfileCallback;
+  Tsqlite3_profile = function(db: PSQLite3; xProfile: TProfileCallback;
     UserData: pointer): pointer; cdecl;
 
   // Query Progress Callbacks
-  Tsqlite3_progress_handler = procedure(db: Psqlite3;
+  Tsqlite3_progress_handler = procedure(db: PSQLite3;
     handler: TProgressCallback; UserData: pointer); cdecl;
 
   // Pseudo-Random Number Generator
@@ -473,13 +507,13 @@ type
     const msg: UTF8String; msgLength: integer); cdecl;
   Tsqlite3_result_error16 = procedure(ctx: Psqlite3_context;
     const msg: UnicodeString; msgLength: integer); cdecl;
-  Tsqlite3_result_error_toobig = procedure(ctx: Psqlite3); cdecl;
-  Tsqlite3_result_error_nomem = procedure(ctx: Psqlite3); cdecl;
-  Tsqlite3_result_error_code = procedure(ctx: Psqlite3;
+  Tsqlite3_result_error_toobig = procedure(ctx: PSQLite3); cdecl;
+  Tsqlite3_result_error_nomem = procedure(ctx: PSQLite3); cdecl;
+  Tsqlite3_result_error_code = procedure(ctx: PSQLite3;
     errcode: integer); cdecl;
-  Tsqlite3_result_int = procedure(ctx: Psqlite3; data: integer); cdecl;
-  Tsqlite3_result_int64 = procedure(ctx: Psqlite3; data: int64); cdecl;
-  Tsqlite3_result_null = procedure(ctx: Psqlite3); cdecl;
+  Tsqlite3_result_int = procedure(ctx: PSQLite3; data: integer); cdecl;
+  Tsqlite3_result_int64 = procedure(ctx: PSQLite3; data: int64); cdecl;
+  Tsqlite3_result_null = procedure(ctx: PSQLite3); cdecl;
   Tsqlite3_result_text = procedure(ctx: Psqlite3_context;
     const data: UTF8String; msgLength: integer;
     xDestructor: TSQLite3Destructor); cdecl;
@@ -508,15 +542,15 @@ type
     subtype: cardinal); cdecl;
 
   // Serialize a database
-  Tsqlite3_serialize = function(db: Psqlite3; const zSchema: UTF8String;
+  Tsqlite3_serialize = function(db: PSQLite3; const zSchema: UTF8String;
     out size: int64; flags: cardinal): PUTF8Char; cdecl;
 
   // Compile-Time Authorization Callbacks
-  Tsqlite3_set_authorizer = function(db: Psqlite3;
+  Tsqlite3_set_authorizer = function(db: PSQLite3;
     xAuth: TAuthorizationCallback; UserData: pointer): integer; cdecl;
 
   // Set the Last Insert Rowid value
-  Tsqlite3_set_last_insert_rowid = procedure(db: Psqlite3; rowid: int64); cdecl;
+  Tsqlite3_set_last_insert_rowid = procedure(db: PSQLite3; rowid: int64); cdecl;
 
   // Suspend Execution For A Short Time
   Tsqlite3_sleep = function(ms: integer): integer; cdecl;
@@ -528,19 +562,16 @@ type
   Tsqlite3_snapshot_free = procedure(snapshot: Psqlite3_snapshot); cdecl;
 
   // Record A Database Snapshot
-  Tsqlite3_snapshot_get = function(db: Psqlite3; const zSchema: UTF8String;
+  Tsqlite3_snapshot_get = function(db: PSQLite3; const zSchema: UTF8String;
     out snapshot: Psqlite3_snapshot): integer; cdecl;
 
   // Start a read transaction on an historical snapshot
-  Tsqlite3_snapshot_open = function(db: Psqlite3; const zSchema: UTF8String;
+  Tsqlite3_snapshot_open = function(db: PSQLite3; const zSchema: UTF8String;
     snapshot: Psqlite3_snapshot): integer; cdecl;
 
   // Recover snapshots from a wal file
-  Tsqlite3_snapshot_recover = function(db: Psqlite3; const zDb: UTF8String)
+  Tsqlite3_snapshot_recover = function(db: PSQLite3; const zDb: UTF8String)
     : integer; cdecl;
-
-  // Impose A Limit On Heap Size
-  Tsqlite3_soft_heap_limit64 = function(N: int64): int64; cdecl;
 
   // SQLite Runtime Status
   Tsqlite3_status = function(op: integer; out pCurrent: integer;
@@ -553,6 +584,7 @@ type
 
   // Determine If A Prepared Statement Has Been Reset
   Tsqlite3_stmt_busy = function(stmt: Psqlite3_stmt): integer; cdecl;
+  Tsqlite3_stmt_isexplain = function(stmt: Psqlite3_stmt): integer; cdecl;
 
   // Determine If An SQL Statement Writes The Database
   Tsqlite3_stmt_readonly = function(stmt: Psqlite3_stmt): integer; cdecl;
@@ -560,6 +592,8 @@ type
   // Prepared Statement Scan Status
   Tsqlite3_stmt_scanstatus = function(stmt: Psqlite3_stmt;
     idx, iScanStatusOp: integer; pOut: pointer): integer; cdecl;
+  Tsqlite3_stmt_scanstatus_v2 = function(stmt: Psqlite3_stmt;
+    idx, iScanStatusOp, flags: integer; pOut: pointer): integer; cdecl;
 
   // Zero Scan-Status Counters
   Tsqlite3_stmt_scanstatus_reset = procedure(stmt: Psqlite3_stmt); cdecl;
@@ -577,12 +611,14 @@ type
   Tsqlite3_stricmp = function(const str1, str2: UTF8String): integer; cdecl;
   Tsqlite3_strnicmp = function(const str1, str2: UTF8String; length: integer)
     : integer; cdecl;
+  Tsqlite3_strlike = function(const zGlob, zStr: UTF8String; cEsc: cardinal)
+    : integer; cdecl;
 
   // Low-level system error code
-  Tsqlite3_system_errno = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_system_errno = function(db: PSQLite3): integer; cdecl;
 
   // Extract Metadata About A Column Of A Table
-  Tsqlite3_table_column_metadata = function(db: Psqlite3;
+  Tsqlite3_table_column_metadata = function(db: PSQLite3;
     const zDbName: UTF8String; const zTableName: UTF8String;
     const zColumnName: UTF8String; out pzDataType: PUTF8Char;
     out pzCollSeq: PUTF8Char; out pNotNull: integer; out pPrimaryKey: integer;
@@ -594,18 +630,19 @@ type
   Tsqlite3_threadsafe = function: integer; cdecl;
 
   // Total Number Of Rows Modified
-  Tsqlite3_total_changes = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_total_changes = function(db: PSQLite3): integer; cdecl;
+  Tsqlite3_total_changes64 = function(db: PSQLite3): Tsqlite3_int64; cdecl;
 
   // SQL Trace Hook
-  Tsqlite3_trace_v2 = function(db: Psqlite3; uMask: cardinal;
+  Tsqlite3_trace_v2 = function(db: PSQLite3; uMask: cardinal;
     xCallback: TTraceV2Callback; pCtx: pointer): integer; cdecl;
 
   // Unlock Notification
-  Tsqlite3_unlock_notify = function(pBlocked: Psqlite3;
+  Tsqlite3_unlock_notify = function(pBlocked: PSQLite3;
     xNotify: TNotifyCallback; pNotifyArg: pointer): integer; cdecl;
 
   // Data Change Notification Callbacks
-  Tsqlite3_update_hook = function(db: Psqlite3; updateCallback: TUpdateCallback;
+  Tsqlite3_update_hook = function(db: PSQLite3; updateCallback: TUpdateCallback;
     UserData: pointer): pointer; cdecl;
 
   // Obtain Values For URI Parameters
@@ -615,6 +652,8 @@ type
     bDefault: integer): integer; cdecl;
   Tsqlite3_uri_int64 = function(const zFilename, zParam: UTF8String;
     bDefault: int64): int64; cdecl;
+  Tsqlite3_uri_key = function(const zFilename: UTF8String; N: integer)
+    : PUTF8Char; cdecl;
 
   // User Data For Functions
   Tsqlite3_user_data = function(ctx: Psqlite3_context): pointer; cdecl;
@@ -624,6 +663,7 @@ type
   Tsqlite3_value_double = function(value: Psqlite3_value): double; cdecl;
   Tsqlite3_value_int = function(value: Psqlite3_value): integer; cdecl;
   Tsqlite3_value_int64 = function(value: Psqlite3_value): int64; cdecl;
+
   Tsqlite3_value_pointer = function(value: Psqlite3_value;
     const name: UTF8String): pointer; cdecl;
   Tsqlite3_value_text = function(value: Psqlite3_value): PUTF8Char; cdecl;
@@ -635,11 +675,15 @@ type
   Tsqlite3_value_type = function(value: Psqlite3_value): integer; cdecl;
   Tsqlite3_value_numeric_type = function(value: Psqlite3_value): integer; cdecl;
   Tsqlite3_value_nochange = function(value: Psqlite3_value): integer; cdecl;
+  Tsqlite3_value_frombind = function(value: Psqlite3_value): integer; cdecl;
 
   // Copy And Free SQL Values
   Tsqlite3_value_dup = function(const value: Psqlite3_value)
     : Psqlite3_value; cdecl;
   Tsqlite3_value_free = procedure(value: Psqlite3_value); cdecl;
+
+  // Report the internal text encoding state of an sqlite3_value object
+  Tsqlite3_value_encoding = function(db: PSQLite3): integer; cdecl;
 
   // F inding The Subtype Of SQL Values
   Tsqlite3_value_subtype = function(value: Psqlite3_value): integer; cdecl;
@@ -655,6 +699,7 @@ type
   // Determine The Collation For a Virtual Table Constraint
   Tsqlite3_vtab_collation = function(info: Psqlite3_index_info; index: integer)
     : PUTF8Char; cdecl;
+  Tsqlite3_vtab_distinct = function(info: Psqlite3_index_info): integer; cdecl;
 
   // Virtual Table Interface Configuration
   // Tsqlite3_vtab_config = NOT translated
@@ -663,20 +708,20 @@ type
   Tsqlite3_vtab_nochange = function(ctx: Psqlite3_context): integer; cdecl;
 
   // Determine The Virtual Table Conflict Policy
-  Tsqlite3_vtab_on_conflict = function(db: Psqlite3): integer; cdecl;
+  Tsqlite3_vtab_on_conflict = function(db: PSQLite3): integer; cdecl;
 
   // Configure an auto-checkpoint
-  Tsqlite3_wal_autocheckpoint = function(db: Psqlite3; N: integer)
+  Tsqlite3_wal_autocheckpoint = function(db: PSQLite3; N: integer)
     : integer; cdecl;
 
   // Checkpoint a database
-  Tsqlite3_wal_checkpoint = function(db: Psqlite3; const zDb: UTF8String)
+  Tsqlite3_wal_checkpoint = function(db: PSQLite3; const zDb: UTF8String)
     : integer; cdecl;
-  Tsqlite3_wal_checkpoint_v2 = function(db: Psqlite3; const zDb: UTF8String;
+  Tsqlite3_wal_checkpoint_v2 = function(db: PSQLite3; const zDb: UTF8String;
     eMode: integer; out pnLog, pnCkpt: integer): integer; cdecl;
 
   // Write-Ahead Log Commit Hook
-  Tsqlite3_wal_hook = function(db: Psqlite3; callback: TWALCallback;
+  Tsqlite3_wal_hook = function(db: PSQLite3; callback: TWALCallback;
     UserData: pointer): pointer; cdecl;
 
   // Win32 Specific Interface
@@ -686,6 +731,10 @@ type
     const zValue: UTF8String): integer; cdecl;
   Tsqlite3_win32_set_directory16 = function(dirType: LongInt;
     const zValue: UnicodeString): integer; cdecl;
+
+  // Determine the transaction state of a database
+  Tsqlite3_txn_state = function(db: PSQLite3; const zSchema: UTF8String)
+    : integer; cdecl;
 
 implementation
 

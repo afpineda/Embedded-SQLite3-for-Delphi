@@ -2,6 +2,7 @@ EXPORTS
 sqlite3_aggregate_context
 sqlite3_aggregate_count
 sqlite3_auto_extension
+sqlite3_autovacuum_pages
 sqlite3_backup_finish
 sqlite3_backup_init
 sqlite3_backup_pagecount
@@ -33,6 +34,7 @@ sqlite3_busy_handler
 sqlite3_busy_timeout
 sqlite3_cancel_auto_extension
 sqlite3_changes
+sqlite3_changes64
 sqlite3_clear_bindings
 sqlite3_close
 sqlite3_close_v2
@@ -67,12 +69,12 @@ sqlite3_complete16
 sqlite3_config
 sqlite3_context_db_handle
 sqlite3_create_collation
-sqlite3_create_collation_v2
 sqlite3_create_collation16
+sqlite3_create_collation_v2
 sqlite3_create_filename
 sqlite3_create_function
-sqlite3_create_function_v2
 sqlite3_create_function16
+sqlite3_create_function_v2
 sqlite3_create_module
 sqlite3_create_module_v2
 sqlite3_create_window_function
@@ -84,6 +86,7 @@ sqlite3_db_config
 sqlite3_db_filename
 sqlite3_db_handle
 sqlite3_db_mutex
+sqlite3_db_name
 sqlite3_db_readonly
 sqlite3_db_release_memory
 sqlite3_db_status
@@ -95,6 +98,7 @@ sqlite3_enable_shared_cache
 sqlite3_errcode
 sqlite3_errmsg
 sqlite3_errmsg16
+sqlite3_error_offset
 sqlite3_errstr
 sqlite3_exec
 sqlite3_expanded_sql
@@ -109,8 +113,6 @@ sqlite3_finalize
 sqlite3_free
 sqlite3_free_filename
 sqlite3_free_table
-sqlite3_fts3_may_be_corrupt
-sqlite3_fts5_may_be_corrupt
 sqlite3_get_autocommit
 sqlite3_get_auxdata
 sqlite3_get_table
@@ -118,6 +120,7 @@ sqlite3_global_recover
 sqlite3_hard_heap_limit64
 sqlite3_initialize
 sqlite3_interrupt
+sqlite3_is_interrupted
 sqlite3_keyword_check
 sqlite3_keyword_count
 sqlite3_keyword_name
@@ -141,17 +144,18 @@ sqlite3_mutex_leave
 sqlite3_mutex_try
 sqlite3_next_stmt
 sqlite3_open
-sqlite3_open_v2
 sqlite3_open16
+sqlite3_open_v2
 sqlite3_os_end
 sqlite3_os_init
 sqlite3_overload_function
 sqlite3_prepare
-sqlite3_prepare_v2
-sqlite3_prepare_v3
 sqlite3_prepare16
 sqlite3_prepare16_v2
 sqlite3_prepare16_v3
+sqlite3_prepare_v2
+sqlite3_prepare_v3
+sqlite3_preupdate_blobwrite
 sqlite3_preupdate_count
 sqlite3_preupdate_depth
 sqlite3_preupdate_hook
@@ -169,10 +173,10 @@ sqlite3_result_blob
 sqlite3_result_blob64
 sqlite3_result_double
 sqlite3_result_error
+sqlite3_result_error16
 sqlite3_result_error_code
 sqlite3_result_error_nomem
 sqlite3_result_error_toobig
-sqlite3_result_error16
 sqlite3_result_int
 sqlite3_result_int64
 sqlite3_result_null
@@ -229,6 +233,7 @@ sqlite3_test_control
 sqlite3_thread_cleanup
 sqlite3_threadsafe
 sqlite3_total_changes
+sqlite3_total_changes64
 sqlite3_trace
 sqlite3_trace_v2
 sqlite3_transfer_bindings
@@ -244,6 +249,7 @@ sqlite3_value_bytes
 sqlite3_value_bytes16
 sqlite3_value_double
 sqlite3_value_dup
+sqlite3_value_encoding
 sqlite3_value_free
 sqlite3_value_frombind
 sqlite3_value_int
@@ -265,8 +271,13 @@ sqlite3_vmprintf
 sqlite3_vsnprintf
 sqlite3_vtab_collation
 sqlite3_vtab_config
+sqlite3_vtab_distinct
+sqlite3_vtab_in
+sqlite3_vtab_in_first
+sqlite3_vtab_in_next
 sqlite3_vtab_nochange
 sqlite3_vtab_on_conflict
+sqlite3_vtab_rhs_value
 sqlite3_wal_autocheckpoint
 sqlite3_wal_checkpoint
 sqlite3_wal_checkpoint_v2
@@ -316,6 +327,7 @@ sqlite3rebaser_rebase
 sqlite3rebaser_rebase_strm
 sqlite3session_attach
 sqlite3session_changeset
+sqlite3session_changeset_size
 sqlite3session_changeset_strm
 sqlite3session_config
 sqlite3session_create
@@ -325,6 +337,7 @@ sqlite3session_enable
 sqlite3session_indirect
 sqlite3session_isempty
 sqlite3session_memory_used
+sqlite3session_object_config
 sqlite3session_patchset
 sqlite3session_patchset_strm
 sqlite3session_table_filter
