@@ -133,8 +133,6 @@ type
       arg2: Pointer): integer; cdecl;
   end; // Tsqlite3_io_methods
 
-  Tsqlite3_filename = UTF8String;
-
   Tsqlite3_index_constraint = record
     iColumn: integer;
     op, usable: Byte;

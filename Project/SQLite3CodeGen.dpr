@@ -47,6 +47,9 @@ uses
 const
   PROC_ARRAY = 'psqlite3_function';
   NAMES_ARRAY = 'sqlite3_fname';
+  REASON_DEPRECATED = 'deprecated';
+  REASON_OPEN_PARAM = 'open parameters';
+  REASON_OPTIONAL = 'compile-time optional';
 
 var
   // Note: global variables
@@ -130,6 +133,14 @@ begin
   // WriteLn(body);
 end;
 
+procedure NoGenCode(const t,reason: string);
+begin
+  // This procedure does nothing useful on purpose.
+  // Used to document SQLite functions not translated
+  // due to whatever reason. It Makes easier future work.
+  WriteLn(Format('  // %s not translated (%s)', [t,reason]));
+end;
+
 procedure DumpItfSection;
 var
   i: integer;
@@ -178,11 +189,11 @@ begin
     bodies := TList<string>.Create;
     procNames := TList<string>.Create;
     try
-
+      GenCode(TypeInfo(Tsqlite3_aggregate_context));
+      NoGenCode('TypeInfo(Tsqlite3_aggregate_count)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_auto_extension));
       GenCode(TypeInfo(Tsqlite3_autovacuum_pages));
       GenCode(TypeInfo(Tsqlite3_backup_finish));
-      GenCode(TypeInfo(Tsqlite3_aggregate_context));
       GenCode(TypeInfo(Tsqlite3_backup_init));
       GenCode(TypeInfo(Tsqlite3_backup_pagecount));
       GenCode(TypeInfo(Tsqlite3_backup_remaining));
@@ -245,11 +256,12 @@ begin
       GenCode(TypeInfo(Tsqlite3_compileoption_used));
       GenCode(TypeInfo(Tsqlite3_complete));
       GenCode(TypeInfo(Tsqlite3_complete16));
-      GenCode(TypeInfo(Tsqlite3_create_filename));
+      NoGenCode('TypeInfo(Tsqlite3_config)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_context_db_handle));
       GenCode(TypeInfo(Tsqlite3_create_collation));
       GenCode(TypeInfo(Tsqlite3_create_collation16));
       GenCode(TypeInfo(Tsqlite3_create_collation_v2));
+      GenCode(TypeInfo(Tsqlite3_create_filename));
       GenCode(TypeInfo(Tsqlite3_create_function));
       GenCode(TypeInfo(Tsqlite3_create_function16));
       GenCode(TypeInfo(Tsqlite3_create_function_v2));
@@ -259,7 +271,7 @@ begin
       GenCode(TypeInfo(Tsqlite3_data_count));
       GenCode(TypeInfo(Tsqlite3_database_file_object));
       GenCode(TypeInfo(Tsqlite3_db_cacheflush));
-      GenCode(TypeInfo(Tsqlite3_db_config));
+      NoGenCode('TypeInfo(Tsqlite3_db_config)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_db_filename));
       GenCode(TypeInfo(Tsqlite3_db_handle));
       GenCode(TypeInfo(Tsqlite3_db_mutex));
@@ -279,6 +291,7 @@ begin
       GenCode(TypeInfo(Tsqlite3_errstr));
       GenCode(TypeInfo(Tsqlite3_exec));
       GenCode(TypeInfo(Tsqlite3_expanded_sql));
+      NoGenCode('TypeInfo(Tsqlite3_expired)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_extended_errcode));
       GenCode(TypeInfo(Tsqlite3_extended_result_codes));
       GenCode(TypeInfo(Tsqlite3_file_control));
@@ -292,6 +305,7 @@ begin
       GenCode(TypeInfo(Tsqlite3_get_autocommit));
       GenCode(TypeInfo(Tsqlite3_get_auxdata));
       GenCode(TypeInfo(Tsqlite3_get_table));
+      NoGenCode('TypeInfo(Tsqlite3_global_recover)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_hard_heap_limit64));
       GenCode(TypeInfo(Tsqlite3_initialize));
       GenCode(TypeInfo(Tsqlite3_interrupt));
@@ -304,12 +318,13 @@ begin
       GenCode(TypeInfo(Tsqlite3_libversion_number));
       GenCode(TypeInfo(Tsqlite3_limit));
       GenCode(TypeInfo(Tsqlite3_load_extension));
-      GenCode(TypeInfo(Tsqlite3_log));
+      NoGenCode('TypeInfo(Tsqlite3_log)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_malloc));
       GenCode(TypeInfo(Tsqlite3_malloc64));
+      NoGenCode('TypeInfo(Tsqlite3_memory_alarm)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_memory_highwater));
       GenCode(TypeInfo(Tsqlite3_memory_used));
-      GenCode(TypeInfo(Tsqlite3_mprintf));
+      NoGenCode('TypeInfo(Tsqlite3_mprintf)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_msize));
       GenCode(TypeInfo(Tsqlite3_mutex_alloc));
       GenCode(TypeInfo(Tsqlite3_mutex_enter));
@@ -319,7 +334,7 @@ begin
       GenCode(TypeInfo(Tsqlite3_mutex_notheld));
       GenCode(TypeInfo(Tsqlite3_mutex_try));
       GenCode(TypeInfo(Tsqlite3_next_stmt));
-      GenCode(TypeInfo(Tsqlite3_normalized_sql));
+      NoGenCode('TypeInfo(Tsqlite3_normalized_sql)',REASON_OPTIONAL);
       GenCode(TypeInfo(Tsqlite3_open));
       GenCode(TypeInfo(Tsqlite3_open16));
       GenCode(TypeInfo(Tsqlite3_open_v2));
@@ -379,7 +394,8 @@ begin
       GenCode(TypeInfo(Tsqlite3_snapshot_get));
       GenCode(TypeInfo(Tsqlite3_snapshot_open));
       GenCode(TypeInfo(Tsqlite3_snapshot_recover));
-      GenCode(TypeInfo(Tsqlite3_snprintf));
+      NoGenCode('TypeInfo(Tsqlite3_snprintf)',REASON_OPEN_PARAM);
+      NoGenCode('TypeInfo(Tsqlite3_soft_heap_limit)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_soft_heap_limit64));
       GenCode(TypeInfo(Tsqlite3_sourceid));
       GenCode(TypeInfo(Tsqlite3_sql));
@@ -391,11 +407,12 @@ begin
       GenCode(TypeInfo(Tsqlite3_stmt_readonly));
       GenCode(TypeInfo(Tsqlite3_stmt_scanstatus));
       GenCode(TypeInfo(Tsqlite3_stmt_scanstatus_reset));
+      GenCode(TypeInfo(Tsqlite3_stmt_scanstatus_v2));
       GenCode(TypeInfo(Tsqlite3_stmt_status));
-      GenCode(TypeInfo(sTqlite3_str_append));
+      GenCode(TypeInfo(Tsqlite3_str_append));
       GenCode(TypeInfo(Tsqlite3_str_appendall));
       GenCode(TypeInfo(Tsqlite3_str_appendchar));
-      GenCode(TypeInfo(Tsqlite3_str_appendf));
+      NoGenCode('TypeInfo(Tsqlite3_str_appendf)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_str_errcode));
       GenCode(TypeInfo(Tsqlite3_str_finish));
       GenCode(TypeInfo(Tsqlite3_str_length));
@@ -409,12 +426,14 @@ begin
       GenCode(TypeInfo(Tsqlite3_strnicmp));
       GenCode(TypeInfo(Tsqlite3_system_errno));
       GenCode(TypeInfo(Tsqlite3_table_column_metadata));
-      GenCode(TypeInfo(Tsqlite3_test_control));
+      NoGenCode('TypeInfo(Tsqlite3_test_control)',REASON_OPEN_PARAM);
+      NoGenCode('TypeInfo(Tsqlite3_thread_cleanup)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_threadsafe));
       GenCode(TypeInfo(Tsqlite3_total_changes));
       GenCode(TypeInfo(Tsqlite3_total_changes64));
       GenCode(TypeInfo(Tsqlite3_trace));
       GenCode(TypeInfo(Tsqlite3_trace_v2));
+      NoGenCode('TypeInfo(Tsqlite3_transfer_bindings)',REASON_DEPRECATED);
       GenCode(TypeInfo(Tsqlite3_txn_state));
       GenCode(TypeInfo(Tsqlite3_unlock_notify));
       GenCode(TypeInfo(Tsqlite3_update_hook));
@@ -442,14 +461,14 @@ begin
       GenCode(TypeInfo(Tsqlite3_value_text16be));
       GenCode(TypeInfo(Tsqlite3_value_text16le));
       GenCode(TypeInfo(Tsqlite3_value_type));
-      GenCode(TypeInfo(Tsqlite3_version));
+      NoGenCode('TypeInfo(Tsqlite3_version)','not callable');
       GenCode(TypeInfo(Tsqlite3_vfs_find));
       GenCode(TypeInfo(Tsqlite3_vfs_register));
       GenCode(TypeInfo(Tsqlite3_vfs_unregister));
-      GenCode(TypeInfo(Tsqlite3_vmprintf));
-      GenCode(TypeInfo(Tsqlite3_vsnprintf));
+      NoGenCode('TypeInfo(Tsqlite3_vmprintf)',REASON_OPEN_PARAM);
+      NoGenCode('TypeInfo(Tsqlite3_vsnprintf)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_vtab_collation));
-      GenCode(TypeInfo(Tssqlite3_vtab_config));
+      NoGenCode('TypeInfo(Tsqlite3_vtab_config)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_vtab_distinct));
       GenCode(TypeInfo(Tsqlite3_vtab_in));
       GenCode(TypeInfo(Tsqlite3_vtab_in_first));
