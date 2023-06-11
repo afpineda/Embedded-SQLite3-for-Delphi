@@ -419,7 +419,7 @@ begin
       GenCode(TypeInfo(Tsqlite3_str_new));
       GenCode(TypeInfo(Tsqlite3_str_reset));
       GenCode(TypeInfo(Tsqlite3_str_value));
-      GenCode(TypeInfo(Tsqlite3_str_vappendf));
+      NoGenCode('TypeInfo(Tsqlite3_str_vappendf)',REASON_OPEN_PARAM);
       GenCode(TypeInfo(Tsqlite3_strglob));
       GenCode(TypeInfo(Tsqlite3_stricmp));
       GenCode(TypeInfo(Tsqlite3_strlike));

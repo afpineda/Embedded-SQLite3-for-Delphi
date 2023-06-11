@@ -411,9 +411,17 @@ type
   TSqlite3_stmt_scanstatus_reset = procedure(stmt: Psqlite3_stmt); cdecl;
   TSqlite3_stmt_status = function(stmt: Psqlite3_stmt; op: integer;
     resetFlag: integer): integer; cdecl;
-
-  Tsqlite3_str_append = procedure(str: UTF8String, const char *zIn, int N); cdecl;
-
+  Tsqlite3_str_append = procedure(str: Psqlite3_str; zIn: UTF8String;
+    N: integer); cdecl;
+  Tsqlite3_str_appendall = procedure(str: Psqlite3_str; zIn: UTF8String); cdecl;
+  Tsqlite3_str_appendchar = procedure(str: Psqlite3_str; N: integer;
+    C: UTF8Char); cdecl;
+  Tsqlite3_str_errcode = function(str: Psqlite3_str): integer; cdecl;
+  Tsqlite3_str_finish = function(str: Psqlite3_str): PUTF8Char; cdecl;
+  Tsqlite3_str_length = function(str: Psqlite3_str): integer; cdecl;
+  Tsqlite3_str_new = function(db: PSQLite3): Psqlite3_str; cdecl;
+  Tsqlite3_str_reset = procedure(db: PSQLite3); cdecl;
+  Tsqlite3_str_value = function(str: Psqlite3_str): PUTF8Char; cdecl;
   TSqlite3_strglob = function(const zGlob, zStr: UTF8String): integer; cdecl;
   TSqlite3_stricmp = function(const str1, str2: UTF8String): integer; cdecl;
   TSqlite3_strnicmp = function(const str1, str2: UTF8String; length: integer)

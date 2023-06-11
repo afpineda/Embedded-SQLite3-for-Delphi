@@ -28,9 +28,10 @@ interface
 
 type
   // Core SQLite objects
-  PSQLite3 = type Pointer;
+  // as listed in https://sqlite.org/c3ref/objlist.html
+  Psqlite3 = type Pointer;
   Psqlite3_api_routines = type Pointer;
-  PSQLite3_backup = type Pointer;
+  Psqlite3_backup = type Pointer;
   Psqlite3_blob = type Pointer;
   Psqlite3_context = type Pointer;
   Psqlite3_data_directory = type Pointer;
@@ -38,9 +39,6 @@ type
   Psqlite3_filename = type Pointer;
   Psqlite3_index_info = type Pointer;
   Psqlite3_int64 = type Pointer;
-  Psqlite3_uint64 = type Pointer;
-  Psqlite_int64 = type Pointer;
-  Psqlite_uint64 = type Pointer;
   Psqlite3_io_methods = type Pointer;
   Psqlite3_mem_methods = type Pointer;
   Psqlite3_module = type Pointer;
@@ -49,14 +47,17 @@ type
   Psqlite3_pcache = type Pointer;
   Psqlite3_pcache_methods2 = type Pointer;
   Psqlite3_pcache_page = type Pointer;
+  Psqlite3_snapshot = type Pointer;
   Psqlite3_stmt = type Pointer;
   Psqlite3_str = type Pointer;
-  Psqlite3_snapshot = type Pointer;
   Psqlite3_temp_directory = type Pointer;
+  Psqlite3_uint64 = type Pointer;
   Psqlite3_value = type Pointer;
   Psqlite3_vfs = type Pointer;
   Psqlite3_vtab = type Pointer;
   Psqlite3_vtab_cursor = type Pointer;
+  Psqlite_int64 = type Pointer;
+  Psqlite_uint64 = type Pointer;
 
 type
   // Auxiliary types and callbacks
